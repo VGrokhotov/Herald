@@ -18,6 +18,18 @@ extension SMTPCredentials {
     }
 }
 
+extension EventLoopFuture {
+    public func throwingFlatMap<NewValue>(_ transform: @escaping (Value) throws -> EventLoopFuture<NewValue>) -> EventLoopFuture<NewValue> {
+        flatMap { value in
+            do {
+                return try transform(value)
+            } catch {
+                return self.eventLoop.makeFailedFuture(error)
+            }
+        }
+    }
+}
+
 // configures your application
 public func configure(_ app: Application) throws {
     // uncomment to serve files from /Public folder
@@ -27,7 +39,8 @@ public func configure(_ app: Application) throws {
     try app.databases.use(.postgres(url: Application.databaseUrl), as: .psql)
     
     // add migrations
-    app.migrations.add(CreateUser())
+    app.migrations.add(User.Migration())
+    app.migrations.add(UserToken.Migration())
     let _ = app.autoMigrate()
     
     // register routes
