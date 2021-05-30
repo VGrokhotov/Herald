@@ -15,8 +15,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
                 
         self.window = UIWindow.init(frame: UIScreen.main.bounds)
-        let rootViewController = MainVC()
-        window?.rootViewController = rootViewController
+        if AuthManager.shared.isAuthorized {
+            window?.rootViewController = MainVC()
+        } else {
+            window?.rootViewController = AuthVC()
+        }
         window?.makeKeyAndVisible()
         
         return true
