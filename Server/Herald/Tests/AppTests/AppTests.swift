@@ -45,7 +45,7 @@ final class AuthTests: XCTestCase {
         
     }
     
-    func cleanAfterAuth() throws {
+    func testCleanAfterAuth() throws {
         let app = Application(.testing)
         defer { app.shutdown() }
         try configure(app)
