@@ -9,7 +9,7 @@ import RealmSwift
 import Foundation
 
 class Messages: Object {
-    @objc dynamic var id = ""
+    @objc dynamic var id = UUID().uuidString
     @objc dynamic var interlocutorID = ""
     var messages = List<Message>()
     

@@ -9,7 +9,7 @@ import RealmSwift
 import Foundation
 
 class Message: Object {
-    @objc dynamic var id = ""
+    @objc dynamic var id = UUID().uuidString
     @objc dynamic var type = ""
     @objc dynamic var content = Data()
     @objc dynamic var time = Date()
