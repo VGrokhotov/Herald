@@ -19,3 +19,9 @@ class User: Object {
         return "id"
     }
 }
+
+struct POSTUser {
+    let name: String
+    let username: String
+    let email: String
+}
