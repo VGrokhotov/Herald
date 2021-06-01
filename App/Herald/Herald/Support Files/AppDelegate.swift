@@ -6,11 +6,19 @@
 //
 
 import UIKit
+import FontBlaster
+import IQKeyboardManagerSwift
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    
+    override init() {
+        super.init()
+        FontBlaster.blast()
+        UIFont.overrideInitialize()
+    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
                 
@@ -18,9 +26,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if AuthManager.shared.isAuthorized {
             window?.rootViewController = MainVC()
         } else {
-            window?.rootViewController = AuthVC()
+            window?.rootViewController = AuthPreviewVC()
         }
         window?.makeKeyAndVisible()
+        
+        IQKeyboardManager.shared.enable = true
         
         return true
     }
