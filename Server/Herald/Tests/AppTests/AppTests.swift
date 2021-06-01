@@ -22,7 +22,7 @@ final class AuthTests: XCTestCase {
         try app.test(.POST, "email", beforeRequest: { req in
             try req.content.encode(username)
         }, afterResponse: { res in
-            XCTAssertEqual(res.status, .ok)
+            XCTAssertEqual(res.status, .noContent)
         })
         
         var headers = HTTPHeaders()

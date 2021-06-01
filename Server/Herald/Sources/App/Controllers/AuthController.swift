@@ -18,9 +18,19 @@ final class AuthController {
     func create(_ req: Request) throws -> EventLoopFuture<Response> {
         try User.validate(content: req)
         let user = try req.content.decode(User.self)
-        return user.create(on: req.db)
-            .map { user }
-            .encodeResponse(status: .created, for: req)
+        
+        return User.query(on: req.db)
+            .filter(\.$username == user.username)
+            .first()
+            .throwingFlatMap { foundUser in
+                if let _ = foundUser {
+                    throw Abort(.badRequest, reason: "User with such username already exists")
+                } else {
+                    return user.create(on: req.db)
+                        .map { user }
+                        .encodeResponse(status: .created, for: req)
+                }
+            }
     }
     
     func email(_ req: Request) throws -> EventLoopFuture<HTTPStatus>  {
@@ -46,7 +56,7 @@ final class AuthController {
                     text: "Your code for entering - \(user.secret!)"
                 )
                 
-                return req.application.sendMail(email, withCredentials: .default).transform(to: .ok)
+                return req.application.sendMail(email, withCredentials: .default).transform(to: .noContent)
             }
     }
     
