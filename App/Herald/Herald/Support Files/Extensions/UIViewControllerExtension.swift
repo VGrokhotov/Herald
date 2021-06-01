@@ -15,9 +15,27 @@ extension UIViewController {
         }
     }
     
+    func disable(buttons: UIButton...) {
+        for button in buttons {
+            button.isEnabled = false
+            UIView.animate(withDuration: 0.4) {
+                button.titleLabel?.textColor = .lightGray
+            }
+        }
+    }
+    
     func activate(views: UIControl...) {
         for view in views {
             view.isEnabled = true
+        }
+    }
+    
+    func activate(buttons: UIButton...) {
+        for button in buttons {
+            button.isEnabled = true
+            UIView.animate(withDuration: 0.4) {
+                button.titleLabel?.textColor = .black
+            }
         }
     }
     

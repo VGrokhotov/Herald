@@ -20,8 +20,20 @@ class User: Object {
     }
 }
 
-struct POSTUser {
+struct POSTUser: Codable {
     let name: String
     let username: String
     let email: String
+}
+
+struct CreatedUser: Codable {
+    let id: UUID
+    let name: String
+    let username: String
+    let email: String
+    let secret: String?
+}
+
+struct Username: Codable {
+    var username: String
 }

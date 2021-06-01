@@ -15,7 +15,12 @@ class AuthPreviewVC: UIViewController {
     }
     
     @IBAction func signUpButtonPressed(_ sender: Any) {
-        present(SignUpVC(), animated: true)
+        let navigationController = UINavigationController()
+        navigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 24)]
+        let signUpVc = SignUpVC()
+        signUpVc.title = "Создаем аккаунт"
+        navigationController.setViewControllers([signUpVc], animated: false)
+        present(navigationController, animated: true)
     }
     
     override func viewDidLoad() {
