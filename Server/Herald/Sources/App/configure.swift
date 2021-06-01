@@ -46,4 +46,6 @@ public func configure(_ app: Application) throws {
     // register routes
     try routes(app)
     
+    app.http.server.configuration.hostname = "0.0.0.0"
+    app.http.server.configuration.port = 8080
 }
