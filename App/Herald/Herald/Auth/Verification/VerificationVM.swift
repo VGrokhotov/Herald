@@ -22,8 +22,9 @@ class VerificationVM {
         signers.use(.hs256(key: code))
         let payload = Payload(username: username, expiration: .init(value: .distantFuture))
         guard let jwt = try? signers.sign(payload) else { return }
-        AuthNetworkService.shared.signIn(with: usernameOnject, key: jwt, completion: { [weak self] userToken in
-            print("code: \(userToken)")
+        AuthNetworkService.shared.signIn(with: usernameOnject, key: jwt, completion: { userWithToken in
+            let userToSave = User(userWithToken)
+            UserManager.shared.save(userToSave)
             completion()
         }, errCompletion: errCompletion)
     }

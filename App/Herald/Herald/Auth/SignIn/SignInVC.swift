@@ -9,10 +9,56 @@ import UIKit
 
 class SignInVC: UIViewController {
 
+    @IBOutlet weak var usernameTextField: UITextField!
+    @IBOutlet weak var enterButton: LoadingButton!
+    
+    var viewModel = SignInVM()
+    
+    @IBAction func enterButtonPressed(_ sender: Any) {
+        guard let username = usernameTextField.text else { return }
+        
+        enterButton.showLoading()
+        viewModel.sendEmail(username: username, completion: { [weak self] status in
+            self?.enterButton.hideLoading()
+            let vc = VerificationVC()
+            vc.viewModel = self?.viewModel.createVerificationVM(username: username)
+            self?.navigationController?.pushViewController(vc, animated: true)
+            self?.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        }, errCompletion: {  [weak self] message in
+            self?.enterButton.hideLoading()
+            self?.errorAlert(with: message)
+        })
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        view.backgroundColor = #colorLiteral(red: 0.521568656, green: 0.1098039225, blue: 0.05098039284, alpha: 1)
+        
+        setupToHideKeyboardOnTapOnView()
+        
+        usernameTextField.delegate = self
+        
+        usernameTextField.addTarget(self, action: #selector(textFieldChanged), for: .allEditingEvents)
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        disable(buttons: enterButton)
     }
 
+}
+
+// MARK: - Text field delegate
+
+extension SignInVC: UITextFieldDelegate {
+    
+    @objc private func textFieldChanged() {
+        if usernameTextField.text?.isEmpty ?? true  {
+            disable(buttons: enterButton)
+        } else {
+            activate(buttons: enterButton)
+        }
+    }
+    
 }

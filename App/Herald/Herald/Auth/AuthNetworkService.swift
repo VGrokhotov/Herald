@@ -84,7 +84,7 @@ class AuthNetworkService: NetworkService {
         task.resume()
     }
     
-    func signIn(with username: Username, key: String, completion: @escaping (UserToken) -> (), errCompletion: @escaping (String) -> ()) {
+    func signIn(with username: Username, key: String, completion: @escaping (UserWithToken) -> (), errCompletion: @escaping (String) -> ()) {
         
         components.path = signin
         

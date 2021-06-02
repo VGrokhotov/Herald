@@ -24,8 +24,11 @@ class VerificationVC: UIViewController, KAPinFieldDelegate {
         activityIndicator.startAnimating()
         disable(views: codeField)
         viewModel.signIn(code: code) { [weak self] in
-            print("ahahahaah")
-            self?.activityIndicator.stopAnimating()
+            guard let window = UIApplication.shared.windows.first else { return }
+            self?.navigationController?.viewControllers.first?.dismiss(animated: true, completion: nil)
+            window.rootViewController = MainVC()
+            window.makeKeyAndVisible()
+            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
         } errCompletion: { [weak self] message in
             guard let self = self else { return }
             self.activityIndicator.stopAnimating()

@@ -13,10 +13,19 @@ class User: Object {
     @objc dynamic var name = ""
     @objc dynamic var username = ""
     @objc dynamic var email = ""
-    @objc dynamic var secret = 0
+    @objc dynamic var token = ""
     
     override static func primaryKey() -> String? {
         return "id"
+    }
+    
+    convenience init(_ user: UserWithToken) {
+        self.init()
+        self.id = user.id.uuidString
+        self.name = user.name
+        self.username = user.username
+        self.email = user.email
+        self.token = user.token
     }
 }
 
@@ -36,4 +45,12 @@ struct CreatedUser: Codable {
 
 struct Username: Codable {
     var username: String
+}
+
+struct UserWithToken: Codable {
+    let id: UUID
+    let name: String
+    let username: String
+    let email: String
+    let token: String
 }
