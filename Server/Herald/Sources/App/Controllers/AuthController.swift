@@ -81,18 +81,23 @@ final class AuthController {
                 
                 return payload.username
             })
-            .throwingFlatMap({ username -> EventLoopFuture<UserToken> in
+            .throwingFlatMap({ username -> EventLoopFuture<UserWithToken> in
                 return User.query(on: req.db)
                     .filter(\.$username == username)
                     .first()
                     .unwrap(or: Abort(.notFound, reason: "User does not exists"))
-                    .throwingFlatMap( { user -> EventLoopFuture<UserToken> in
+                    .throwingFlatMap( { user -> EventLoopFuture<UserWithToken> in
                         let token = try user.generateToken()
-                        return token.create(on: req.db)
-                            .map { token }
+                        guard let userId = user.id else { throw Abort(.internalServerError, reason: "No user ID")}
+                        return token.create(on: req.db).map {
+                            UserWithToken(
+                                id: userId,
+                                name: user.name,
+                                username: user.username,
+                                email: user.email,
+                                token: token.value)
+                        }
                     })
-            }).map({ token in
-                ["token" : token.value]
             })
             .encodeResponse(status: .accepted, for: req)
     }

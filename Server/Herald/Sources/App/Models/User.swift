@@ -78,3 +78,11 @@ extension User {
         }
     }
 }
+
+struct UserWithToken: Content {
+    let id: UUID
+    let name: String
+    let username: String
+    let email: String
+    let token: String
+}
