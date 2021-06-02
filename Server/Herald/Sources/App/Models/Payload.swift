@@ -5,7 +5,7 @@
 //  Created by Vladislav Grokhotov on 19.05.2021.
 //
 
-import JWT
+import JWTKit
 
 struct Payload: JWTPayload {
     

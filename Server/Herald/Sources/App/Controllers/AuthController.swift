@@ -9,7 +9,7 @@ import Vapor
 import Fluent
 import VaporSMTPKit
 import SMTPKitten
-import JWT
+import JWTKit
 
 final class AuthController {
     
@@ -72,8 +72,12 @@ final class AuthController {
             }
             .unwrap(or: Abort(.conflict, reason: "User does not have secret"))
             .flatMapThrowing({ secret -> String in
-                req.application.jwt.signers.use(.hs256(key: secret))
-                let payload = try req.jwt.verify(as: Payload.self)
+                let signers = JWTSigners()
+                signers.use(.hs256(key: secret))
+                guard let jwt = req.headers.bearerAuthorization?.token else {
+                    throw Abort(.unauthorized)
+                }
+                let payload = try signers.verify(jwt, as: Payload.self)
                 
                 return payload.username
             })
