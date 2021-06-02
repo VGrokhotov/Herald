@@ -18,12 +18,36 @@
         <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" restorationIdentifier="MainVC" id="i5M-Pr-FkT">
             <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="BCa-cG-iTz">
+                    <rect key="frame" x="52" y="221" width="310.5" height="354.5"/>
+                    <subviews>
+                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="7" translatesAutoresizingMaskIntoConstraints="NO" id="gfJ-4q-cm6">
+                            <rect key="frame" x="0.0" y="0.0" width="310.5" height="310.5"/>
+                            <constraints>
+                                <constraint firstAttribute="width" secondItem="gfJ-4q-cm6" secondAttribute="height" multiplier="1:1" id="QRX-MM-DXx"/>
+                            </constraints>
+                        </imageView>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="76W-YM-NVT">
+                            <rect key="frame" x="92.5" y="320.5" width="125" height="34"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="18"/>
+                            <state key="normal" title="Разлогиниться"/>
+                        </button>
+                    </subviews>
+                </stackView>
+            </subviews>
             <viewLayoutGuide key="safeArea" id="fnl-2z-Ty3"/>
             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-            <point key="canvasLocation" x="20" y="84"/>
+            <constraints>
+                <constraint firstItem="BCa-cG-iTz" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" constant="-50" id="WYt-OV-fuh"/>
+                <constraint firstItem="BCa-cG-iTz" firstAttribute="centerX" secondItem="i5M-Pr-FkT" secondAttribute="centerX" id="YpX-ht-Aec"/>
+                <constraint firstItem="BCa-cG-iTz" firstAttribute="width" secondItem="i5M-Pr-FkT" secondAttribute="width" multiplier="3:4" id="rBF-9E-O1A"/>
+            </constraints>
+            <point key="canvasLocation" x="18.840579710144929" y="83.705357142857139"/>
         </view>
     </objects>
     <resources>
+        <image name="7" width="512" height="512"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

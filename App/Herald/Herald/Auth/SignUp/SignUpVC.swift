@@ -55,6 +55,11 @@ class SignUpVC: UIViewController {
         usernameTextField.addTarget(self, action: #selector(textFieldChanged), for: .allEditingEvents)
         emailTextField.addTarget(self, action: #selector(validateEmail), for: .allEditingEvents)
         
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
         disable(buttons: signUpButton)
     }
 
