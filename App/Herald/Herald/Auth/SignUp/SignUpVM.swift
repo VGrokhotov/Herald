@@ -28,4 +28,10 @@ class SignUpVM {
         let usernameOnject = Username(username: username)
         AuthNetworkService.shared.email(with: usernameOnject, completion: completion, errCompletion: errCompletion)
     }
+    
+    func createVerificationVM(username: String) -> VerificationVM {
+        let vm = VerificationVM()
+        vm.username = username
+        return vm
+    }
 }

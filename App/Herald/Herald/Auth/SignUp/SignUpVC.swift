@@ -28,7 +28,9 @@ class SignUpVC: UIViewController {
         viewModel.signUp(name: name, username: username, email: email, completion: { [weak self] newUser in
             self?.viewModel.sendEmail(username: newUser.username, completion: { [weak self] status in
                 self?.signUpButton.hideLoading()
-                self?.navigationController?.pushViewController(VerificationVC(), animated: true)
+                let vc = VerificationVC()
+                vc.viewModel = self?.viewModel.createVerificationVM(username: newUser.username)
+                self?.navigationController?.pushViewController(vc, animated: true)
                 self?.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
             }, errCompletion: {  [weak self] message in
                 self?.signUpButton.hideLoading()

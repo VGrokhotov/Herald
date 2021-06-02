@@ -6,17 +6,25 @@
 //
 
 import Foundation
+import JWTKit
 
 class VerificationVM {
     
+    var username: String!
+    
     func signIn(
-        username: String,
-        completion: @escaping (CreatedUser) -> (),
+        code: String,
+        completion: @escaping () -> (),
         errCompletion: @escaping (String) -> ()
     ) {
-        
         let usernameOnject = Username(username: username)
-        let key = "lol"
-//        AuthNetworkService.shared.sugnIn(with: usernameOnject, key: key, completion: completion, errCompletion: errCompletion)
+        let signers = JWTSigners()
+        signers.use(.hs256(key: code))
+        let payload = Payload(username: username, expiration: .init(value: .distantFuture))
+        guard let jwt = try? signers.sign(payload) else { return }
+        AuthNetworkService.shared.signIn(with: usernameOnject, key: jwt, completion: { [weak self] userToken in
+            print("code: \(userToken)")
+            completion()
+        }, errCompletion: errCompletion)
     }
 }
