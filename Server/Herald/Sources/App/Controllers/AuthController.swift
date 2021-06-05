@@ -63,6 +63,10 @@ final class AuthController {
     func signin(_ req: Request) throws -> EventLoopFuture<Response> {
         let username = try req.content.decode(Username.self)
         
+        guard let jwt = req.headers.bearerAuthorization?.token else {
+            throw Abort(.unauthorized)
+        }
+        
         return User.query(on: req.db)
             .filter(\.$username == username.username)
             .first()
@@ -74,11 +78,7 @@ final class AuthController {
             .flatMapThrowing({ secret -> String in
                 let signers = JWTSigners()
                 signers.use(.hs256(key: secret))
-                guard let jwt = req.headers.bearerAuthorization?.token else {
-                    throw Abort(.unauthorized)
-                }
                 let payload = try signers.verify(jwt, as: Payload.self)
-                
                 return payload.username
             })
             .throwingFlatMap({ username -> EventLoopFuture<UserWithToken> in
