@@ -102,4 +102,18 @@ final class AuthController {
             .encodeResponse(status: .accepted, for: req)
     }
     
+    func logout(_ req: Request) throws -> EventLoopFuture<HTTPStatus>  {
+        try req.auth.require(User.self)
+        
+        let token = req.headers.bearerAuthorization!.token
+        return UserToken.query(on: req.db)
+            .filter(\.$value == token)
+            .first()
+            .unwrap(or: Abort(.unauthorized))
+            .flatMap { userToken in
+                userToken.delete(on: req.db)
+            }
+            .transform(to: .noContent)
+    }
+    
 }

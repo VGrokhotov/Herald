@@ -4,8 +4,9 @@ func routes(_ app: Application) throws {
     app.get { req in
         "Hello"
     }
-    
+
     let authController = AuthController()
+    let tokenProtected = app.grouped(UserToken.authenticator())
     
     app.post("signup", use: authController.create)
         .description("Creates new User")
@@ -13,4 +14,7 @@ func routes(_ app: Application) throws {
         .description("Sends email with code")
     app.post("signin", use: authController.signin)
         .description("Returns token")
+    tokenProtected.post("logout", use: authController.logout)
+        .description("Deletes token")
+    
 }
