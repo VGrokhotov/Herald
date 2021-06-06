@@ -11,6 +11,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="MainVC" customModule="Herald" customModuleProvider="target">
             <connections>
+                <outlet property="logoutButton" destination="76W-YM-NVT" id="uog-1w-bus"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -28,10 +29,13 @@
                                 <constraint firstAttribute="width" secondItem="gfJ-4q-cm6" secondAttribute="height" multiplier="1:1" id="QRX-MM-DXx"/>
                             </constraints>
                         </imageView>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="76W-YM-NVT">
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="76W-YM-NVT" customClass="LoadingButton" customModule="Herald" customModuleProvider="target">
                             <rect key="frame" x="92.5" y="320.5" width="125" height="34"/>
                             <fontDescription key="fontDescription" type="system" pointSize="18"/>
                             <state key="normal" title="Разлогиниться"/>
+                            <connections>
+                                <action selector="logoutButtonPressed:" destination="-1" eventType="touchUpInside" id="QJJ-aj-67s"/>
+                            </connections>
                         </button>
                     </subviews>
                 </stackView>

@@ -15,6 +15,7 @@ class AuthNetworkService: NetworkService {
     private let signup = "/signup"
     private let signin = "/signin"
     private let email = "/email"
+    private let logout = "/logout"
     
     func signUp(with user: POSTUser, completion: @escaping (CreatedUser) -> (), errCompletion: @escaping (String) -> ()) {
         
@@ -110,6 +111,31 @@ class AuthNetworkService: NetworkService {
         let session = URLSession.shared
         
         let task = session.dataTask(with: request) { (data, response, error) in
+            if let error = error {
+                self.failed(message: error.localizedDescription, errCompletion: errCompletion)
+            } else if let httpResponse = response as? HTTPURLResponse {
+                self.completionHandler(httpResponse.statusCode, data, completion, errCompletion)
+            }
+        }
+        task.resume()
+    }
+    
+    func logout(key: String, completion: @escaping (Int) -> (), errCompletion: @escaping (String) -> ()) {
+        
+        components.path = logout
+        
+        guard
+            let url = components.url
+        else {
+            badURL(errCompletion)
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("Bearer " + key, forHTTPHeaderField: "Authorization")
+
+        let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
             if let error = error {
                 self.failed(message: error.localizedDescription, errCompletion: errCompletion)
             } else if let httpResponse = response as? HTTPURLResponse {

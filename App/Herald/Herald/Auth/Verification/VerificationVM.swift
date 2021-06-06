@@ -25,6 +25,7 @@ class VerificationVM {
         AuthNetworkService.shared.signIn(with: usernameOnject, key: jwt, completion: { userWithToken in
             let userToSave = User(userWithToken)
             UserManager.shared.save(userToSave)
+            let _ = AuthManager.shared.isAuthorized
             completion()
         }, errCompletion: errCompletion)
     }
