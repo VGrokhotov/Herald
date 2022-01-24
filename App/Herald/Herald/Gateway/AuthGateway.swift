@@ -1,5 +1,5 @@
 //
-//  AuthNetworkService.swift
+//  AuthGateway.swift
 //  Herald
 //
 //  Created by Vladislav Grokhotov on 01.06.2021.
@@ -7,10 +7,10 @@
 
 import Foundation
 
-class AuthNetworkService: NetworkService {
+class AuthGateway: BaseNetworkService {
     
     private override init() { super.init() }
-    static let shared = AuthNetworkService()
+    static let shared = AuthGateway()
     
     private let signup = "/signup"
     private let signin = "/signin"

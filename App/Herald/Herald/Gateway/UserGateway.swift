@@ -1,5 +1,5 @@
 //
-//  UserManager.swift
+//  UserGateway.swift
 //  Herald
 //
 //  Created by Vladislav Grokhotov on 30.05.2021.
@@ -7,10 +7,10 @@
 
 import RealmSwift
 
-class UserManager {
+class UserGateway {
     
     private init() {}
-    static let shared = UserManager()
+    static let shared = UserGateway()
     
     private var realm = try! Realm()
     

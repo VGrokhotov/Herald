@@ -77,8 +77,8 @@ extension UIViewController {
     
     func successAlert(with message: String, action: @escaping () -> () = {}) {
         
-        let allert = UIAlertController(title: "Success", message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+        let allert = UIAlertController(title: Strings.success, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: Strings.ok, style: .default) { _ in
             action()
         }
         
@@ -88,8 +88,8 @@ extension UIViewController {
     
     func attentionAlert(with message: String, action: @escaping () -> () = {}) {
         
-        let allert = UIAlertController(title: "Attention!", message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "OK", style: .default) { _ in
+        let allert = UIAlertController(title: Strings.attention, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: Strings.ok, style: .default) { _ in
             action()
         }
         
@@ -99,21 +99,21 @@ extension UIViewController {
     
     func errorAlert(with message: String, action: Optional<() -> ()> = nil ){
         
-        let allert = UIAlertController(title: "Error occurred", message: message, preferredStyle: .alert)
+        let allert = UIAlertController(title: Strings.error, message: message, preferredStyle: .alert)
         
         if let action = action {
             
-            let retryAction = UIAlertAction(title: "Retry", style: .default) { _ in
+            let retryAction = UIAlertAction(title: Strings.retry, style: .default) { _ in
                 action()
             }
             
-            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+            let cancelAction = UIAlertAction(title: Strings.cancel, style: .cancel)
             
             allert.addAction(retryAction)
             allert.addAction(cancelAction)
             
         } else {
-            let okAction = UIAlertAction(title: "Ok", style: .default)
+            let okAction = UIAlertAction(title: Strings.ok, style: .default)
             allert.addAction(okAction)
         }
         

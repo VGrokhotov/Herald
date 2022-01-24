@@ -1,5 +1,5 @@
 //
-//  MainVM.swift
+//  MainInteractor.swift
 //  Herald
 //
 //  Created by Vladislav Grokhotov on 29.05.2021.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class MainVM {
+class MainInteractor {
     func logout(
         completion: @escaping () -> (),
         errCompletion: @escaping (String) -> ()
@@ -17,9 +17,8 @@ class MainVM {
             return
         }
         let token = user.token
-        AuthNetworkService.shared.logout(key: token, completion: { status in
-            UserManager.shared.delete(user)
-            let _ = AuthManager.shared.isAuthorized
+        AuthGateway.shared.logout(key: token, completion: { status in
+            UserGateway.shared.delete(user)
             completion()
         }, errCompletion: errCompletion)
     }

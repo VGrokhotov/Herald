@@ -14,7 +14,7 @@ class AuthPreviewVC: UIViewController {
         let navigationController = UINavigationController()
         navigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 24)]
         let signUpVc = SignInVC()
-        signUpVc.title = "Логинимся"
+        signUpVc.title = Strings.loginTitle
         navigationController.setViewControllers([signUpVc], animated: false)
         present(navigationController, animated: true)
     }
@@ -23,7 +23,7 @@ class AuthPreviewVC: UIViewController {
         let navigationController = UINavigationController()
         navigationController.navigationBar.titleTextAttributes = [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 24)]
         let signUpVc = SignUpVC()
-        signUpVc.title = "Создаем аккаунт"
+        signUpVc.title = Strings.signUpTitle
         navigationController.setViewControllers([signUpVc], animated: false)
         present(navigationController, animated: true)
     }
@@ -32,5 +32,4 @@ class AuthPreviewVC: UIViewController {
         super.viewDidLoad()
         
     }
-
 }

@@ -12,7 +12,7 @@ class MainVC: UIViewController {
 
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
-    let viewModel = MainVM()
+    let interactor = MainInteractor()
     
     var sideMenuVC: SideMenuVC!
     var isExpanded: Bool = false
@@ -30,17 +30,14 @@ class MainVC: UIViewController {
     
     func logout() {
         activityIndicator.startAnimating()
-        viewModel.logout { [weak self] in
+        interactor.logout { [weak self] in
             self?.activityIndicator.stopAnimating()
-            guard let window = UIApplication.shared.windows.first else { return }
             self?.dismiss(animated: true, completion: nil)
-            window.rootViewController = AuthPreviewVC()
-            window.makeKeyAndVisible()
-            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
+            appDelegate?.isAuthorized = false
         } errCompletion: { [weak self] message in
             self?.activityIndicator.stopAnimating()
             self?.errorAlert(with: message)
         }
     }
-
 }

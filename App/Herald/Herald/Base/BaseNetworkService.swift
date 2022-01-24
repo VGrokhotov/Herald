@@ -1,5 +1,5 @@
 //
-//  NetworkService.swift
+//  BaseNetworkService.swift
 //  Herald
 //
 //  Created by Vladislav Grokhotov on 01.06.2021.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-class NetworkService {
+class BaseNetworkService {
     
     init() {
         components = URLComponents()
@@ -18,7 +18,7 @@ class NetworkService {
     
     var components: URLComponents
     
-    internal let badMessage = env.badMessage
+    internal let badMessage = Strings.badMessage
     
     func badURL(_ errCompletion: @escaping (String) -> ()) {
         print("Wrong URL")
@@ -32,8 +32,6 @@ class NetworkService {
             errCompletion(message)
         }
     }
-    
-    
     
     func success<T: Decodable>(with data: Data?, status: Int, completion: @escaping (T) -> ()) {
         if let data = data {

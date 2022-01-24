@@ -12,16 +12,16 @@ class SignInVC: UIViewController {
     @IBOutlet weak var usernameTextField: UITextField!
     @IBOutlet weak var enterButton: LoadingButton!
     
-    var viewModel = SignInVM()
+    var interactor = SignInInteractor()
     
     @IBAction func enterButtonPressed(_ sender: Any) {
         guard let username = usernameTextField.text else { return }
         
         enterButton.showLoading()
-        viewModel.sendEmail(username: username, completion: { [weak self] status in
+        interactor.sendEmail(username: username, completion: { [weak self] status in
             self?.enterButton.hideLoading()
             let vc = VerificationVC()
-            vc.viewModel = self?.viewModel.createVerificationVM(username: username)
+            vc.interactor = self?.interactor.createVerificationVM(username: username)
             self?.navigationController?.pushViewController(vc, animated: true)
             self?.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
         }, errCompletion: {  [weak self] message in
@@ -46,7 +46,6 @@ class SignInVC: UIViewController {
         
         disable(buttons: enterButton)
     }
-
 }
 
 // MARK: - Text field delegate
@@ -60,5 +59,4 @@ extension SignInVC: UITextFieldDelegate {
             activate(buttons: enterButton)
         }
     }
-    
 }

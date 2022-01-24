@@ -12,31 +12,26 @@ class VerificationVC: UIViewController, KAPinFieldDelegate {
     
     @IBOutlet var codeField: KAPinField!
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-    var viewModel: VerificationVM!
+    var interactor: VerificationInteractor!
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Почти готово!"
+        title = Strings.verificatioTitle
         codeField.properties.delegate = self
     }
     
     func pinField(_ field: KAPinField, didFinishWith code: String) {
         activityIndicator.startAnimating()
         disable(views: codeField)
-        viewModel.signIn(code: code) { [weak self] in
-            guard let window = UIApplication.shared.windows.first else { return }
+        interactor.signIn(code: code) { [weak self] in
             self?.navigationController?.viewControllers.first?.dismiss(animated: true, completion: nil)
-            window.rootViewController = MainVC()
-            window.makeKeyAndVisible()
-            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil, completion: nil)
+            let appDelegate = UIApplication.shared.delegate as? AppDelegate
+            appDelegate?.isAuthorized = true
         } errCompletion: { [weak self] message in
             guard let self = self else { return }
             self.activityIndicator.stopAnimating()
             self.errorAlert(with: message)
             self.activate(views: self.codeField)
         }
-
     }
-    
-
 }

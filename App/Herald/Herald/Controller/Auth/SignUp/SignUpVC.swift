@@ -15,7 +15,7 @@ class SignUpVC: UIViewController {
     @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var signUpButton: LoadingButton!
     
-    let viewModel = SignUpVM()
+    let interactor = SignUpInteractor()
     
     @IBAction func signUpButtonPressed(_ sender: Any) {
         guard
@@ -25,11 +25,12 @@ class SignUpVC: UIViewController {
         else { return }
         
         signUpButton.showLoading()
-        viewModel.signUp(name: name, username: username, email: email, completion: { [weak self] newUser in
-            self?.viewModel.sendEmail(username: newUser.username, completion: { [weak self] status in
+        
+        interactor.signUp(name: name, username: username, email: email, completion: { [weak self] newUser in
+            self?.interactor.sendEmail(username: newUser.username, completion: { [weak self] status in
                 self?.signUpButton.hideLoading()
                 let vc = VerificationVC()
-                vc.viewModel = self?.viewModel.createVerificationVM(username: newUser.username)
+                vc.interactor = self?.interactor.createVerificationVM(username: newUser.username)
                 self?.navigationController?.pushViewController(vc, animated: true)
                 self?.navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
             }, errCompletion: {  [weak self] message in
@@ -93,5 +94,4 @@ extension SignUpVC: UITextFieldDelegate {
     func areFieldsNotCorrect() -> Bool {
         return nameTextField.text?.isEmpty ?? true || usernameTextField.text?.isEmpty ?? true || emailTextField.text?.isEmpty ?? true || !(emailTextField.text?.isValidEmail() ?? false)
     }
-    
 }

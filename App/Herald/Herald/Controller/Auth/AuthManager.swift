@@ -14,15 +14,12 @@ class AuthManager {
     
     var user: User?
     
-    var isAuthorized: Bool {
-        if let user = UserManager.shared.get() {
+    func getUser() {
+        if let user = UserGateway.shared.get() {
             self.user = user
-            return true
+            return
         }
+        
         user = nil
-        return false
     }
-    
-    
-    
 }

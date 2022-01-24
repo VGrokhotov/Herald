@@ -18,9 +18,9 @@ class SideMenuVC: UIViewController {
     @IBOutlet var footerLabel: UILabel!
 
     var menu: [SideMenuModel] = [
-        SideMenuModel(icon: UIImage(systemName: "person.fill")!, title: "Profile"),
-        SideMenuModel(icon: UIImage(systemName: "slider.horizontal.3")!, title: "Settings"),
-        SideMenuModel(icon: UIImage(systemName: "return")!, title: "Logout")
+        SideMenuModel(icon: UIImage(systemName: "person.fill")!, title: Strings.profileSideMenuTitle),
+        SideMenuModel(icon: UIImage(systemName: "slider.horizontal.3")!, title: Strings.settingsSideMenuTitle),
+        SideMenuModel(icon: UIImage(systemName: "return")!, title: Strings.logoutSideMenuTitle)
     ]
     
     var delegate: SideMenuVCDelegate?
@@ -35,7 +35,7 @@ class SideMenuVC: UIViewController {
 
         self.footerLabel.textColor = UIColor.black
         self.footerLabel.font = UIFont.systemFont(ofSize: 12, weight: .bold)
-        self.footerLabel.text = "Developed by VGrokhotov"
+        self.footerLabel.text = Strings.developedByTitle
 
         self.sideMenuTableView.register(SideMenuCell.nib, forCellReuseIdentifier: SideMenuCell.identifier)
 
