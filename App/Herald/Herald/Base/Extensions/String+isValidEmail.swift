@@ -1,5 +1,5 @@
 //
-//  StringExtension.swift
+//  String+isValidEmail.swift
 //  Herald
 //
 //  Created by Vladislav Grokhotov on 01.06.2021.

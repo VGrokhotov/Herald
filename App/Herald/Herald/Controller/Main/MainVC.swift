@@ -8,12 +8,13 @@
 import UIKit
 import RealmSwift
 
-class MainVC: UIViewController {
+class MainVC: UIViewController, EmptyDataRepresentable {
 
     @IBOutlet weak var activityIndicator: UIActivityIndicatorView!
     
-    let interactor = MainInteractor()
+    private let interactor = MainInteractor()
     
+    var emptyDataView: EmptyDataView? = BaseEmptyDataView()
     var sideMenuVC: SideMenuVC!
     var isExpanded: Bool = false
     var sideMenuTrailingConstraint: NSLayoutConstraint!
@@ -26,6 +27,14 @@ class MainVC: UIViewController {
         super.viewDidLoad()
         
         configureSideMenu()
+        
+        setupEmptyDataView()
+        
+        activityIndicator.startAnimating()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.activityIndicator.stopAnimating()
+            self.showEmptyDataView()
+        }
     }
     
     func logout() {

@@ -1,5 +1,5 @@
 //
-//  MainVCWithSideMenuExtetion.swift
+//  MainVC+SideMenu.swift
 //  Herald
 //
 //  Created by Vladislav Grokhotov on 29.06.2021.

@@ -1,5 +1,5 @@
 //
-//  UIFontExtension.swift
+//  UIFont+SF.swift
 //  Herald
 //
 //  Created by Vladislav Grokhotov on 31.05.2021.
