@@ -15,116 +15,94 @@ final class AuthController {
     
     //MARK: POST
     
-    func create(_ req: Request) throws -> EventLoopFuture<Response> {
+    func create(_ req: Request) async throws -> Response {
         try User.validate(content: req)
         
         let user = try req.content.decode(User.self)
         
-        return User.query(on: req.db)
-            .filter(\.$username == user.username)
-            .first()
-            .throwingFlatMap { foundUser in
-                if let _ = foundUser {
-                    throw Abort(.badRequest, reason: "User with such username already exists")
-                } else {
-                    return user.create(on: req.db)
-                        .map { user }
-                        .encodeResponse(status: .created, for: req)
-                }
-            }
+        if let _ = try await User.query(on: req.db).filter(\.$username == user.username).first() {
+            throw Abort(.badRequest, reason: "User with such username already exists")
+        }
+        
+        try await user.create(on: req.db)
+        
+        return try await user.encodeResponse(status: .created, for: req)
     }
     
-    func email(_ req: Request) throws -> EventLoopFuture<HTTPStatus>  {
+    func email(_ req: Request) async throws -> HTTPStatus  {
         let username = try req.content.decode(Username.self)
         
-        return User.query(on: req.db)
-            .filter(\.$username == username.username)
-            .first()
-            .unwrap(or: Abort(.notFound, reason: "User does not exists"))
-            .flatMap{ user -> EventLoopFuture<User> in
-                let secret = String(Int.random(in: 1000..<10000))
-                
-                user.secret = secret
-                
-                return user.update(on: req.db).map{user }
-            }
-            .flatMap { user in
-                let email = Mail(
-                    from: "vladgrokhotov@gmail.com",
-                    to: [
-                        MailUser(name: user.name, email: user.email)
-                    ],
-                    subject: "Entering the account",
-                    contentType: .plain,
-                    text: "Your code for entering - \(user.secret!)"
-                )
-                
-                return req.application.sendMail(email, withCredentials: .default).transform(to: .noContent)
-            }
+        guard let user = try await User.query(on: req.db).filter(\.$username == username.username).first() else {
+            throw Abort(.notFound, reason: "User does not exists")
+        }
+        
+        let secret = String(Int.random(in: 1000..<10000))
+        
+        user.secret = secret
+        
+        try await user.update(on: req.db)
+        
+        let email = Mail(
+            from: "vladgrokhotov@gmail.com",
+            to: [
+                MailUser(name: user.name, email: user.email)
+            ],
+            subject: "Entering the account",
+            contentType: .plain,
+            text: "Your code for entering - \(user.secret!)"
+        )
+        
+        return try await req.application.sendMail(email, withCredentials: .default).transform(to: .noContent).get()
     }
     
-    func signin(_ req: Request) throws -> EventLoopFuture<Response> {
+    func signIn(_ req: Request) async throws -> Response {
         let username = try req.content.decode(Username.self)
         
         guard let jwt = req.headers.bearerAuthorization?.token else {
             throw Abort(.unauthorized)
         }
         
-        return User.query(on: req.db)
-            .filter(\.$username == username.username)
-            .first()
-            .unwrap(or: Abort(.notFound, reason: "User does not exists"))
-            .map { user -> String? in
-                user.$secret.wrappedValue
-            }
-            .unwrap(or: Abort(.conflict, reason: "User does not have secret"))
-            .flatMapThrowing { secret -> String in
-                let signers = JWTSigners()
-                signers.use(.hs256(key: secret))
-                
-                let payload = try signers.verify(jwt, as: Payload.self)
-                
-                return payload.username
-            }
-            .throwingFlatMap { username -> EventLoopFuture<UserWithToken> in
-                return User.query(on: req.db)
-                    .filter(\.$username == username)
-                    .first()
-                    .unwrap(or: Abort(.notFound, reason: "User does not exists"))
-                    .throwingFlatMap { user -> EventLoopFuture<UserWithToken> in
-                        let token = try user.generateToken()
-                        
-                        guard let userId = user.id else {
-                            throw Abort(.internalServerError, reason: "No user ID")
-                        }
-                        
-                        return token.create(on: req.db).map {
-                            UserWithToken(
-                                id: userId,
-                                name: user.name,
-                                username: user.username,
-                                email: user.email,
-                                token: token.value
-                            )
-                        }
-                    }
-            }
-            .encodeResponse(status: .accepted, for: req)
+        guard let user = try await User.query(on: req.db).filter(\.$username == username.username).first() else {
+            throw Abort(.notFound, reason: "User does not exists")
+        }
+        
+        guard let secret = user.$secret.wrappedValue else {
+            throw Abort(.conflict, reason: "User does not have secret")
+        }
+        
+        let signers = JWTSigners()
+        signers.use(.hs256(key: secret))
+        
+        let payload = try signers.verify(jwt, as: Payload.self)
+        let token = try user.generateToken()
+        
+        guard let userId = user.id else {
+            throw Abort(.internalServerError, reason: "No user ID")
+        }
+        
+        try await token.create(on: req.db)
+        
+        let userWithToken = UserWithToken(
+            id: userId,
+            name: user.name,
+            username: user.username,
+            email: user.email,
+            token: token.value
+        )
+        
+        return try await userWithToken.encodeResponse(status: .accepted, for: req)
     }
     
-    func logout(_ req: Request) throws -> EventLoopFuture<HTTPStatus>  {
+    func logOut(_ req: Request) async throws -> HTTPStatus {
         try req.auth.require(User.self)
         
         let token = req.headers.bearerAuthorization!.token
         
-        return UserToken.query(on: req.db)
-            .filter(\.$value == token)
-            .first()
-            .unwrap(or: Abort(.unauthorized))
-            .flatMap { userToken in
-                userToken.delete(on: req.db)
-            }
-            .transform(to: .noContent)
+        guard let userToken = try await UserToken.query(on: req.db).filter(\.$value == token).first() else {
+            throw Abort(.unauthorized)
+        }
+        
+        return try await userToken.delete(on: req.db).transform(to: .noContent).get()
     }
     
 }
