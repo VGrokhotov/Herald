@@ -4,7 +4,7 @@ import Fluent
 
 final class AuthTests: XCTestCase {
     
-    func testAuth() throws {
+    func testAuth() async throws {
         let app = Application(.testing)
         
         defer { app.shutdown() }
@@ -42,22 +42,21 @@ final class AuthTests: XCTestCase {
             value: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3JuIjoidXNlcm5hbWUiLCJleHAiOjY0MDkyMjExMjAwfQ.gJBnFeW-3b_ih6lP5gQGzhIbfvHsKUuTv6zfJ3ThkY0"
         )
         
-        try app.test(
+        try await app.test(
             .POST, "signin",
             headers: headers,
             beforeRequest: { req in
                 try req.content.encode(username)
                 
-                try User.query(on: app.db)
-                    .filter(\.$username == username.username)
-                    .first()
-                    .unwrap(or: Abort(.notFound, reason: "User does not exists"))
-                    .flatMap { user -> EventLoopFuture<Void> in
-                        user.secret = "1111"
-                        
-                        return user.update(on: app.db)
-                    }.wait()
+                guard
+                    let user = try await User.query(on: app.db).filter(\.$username == username.username).first()
+                else {
+                    throw Abort(.notFound, reason: "User does not exists")
+                }
                 
+                user.secret = "1111"
+                
+                try await user.update(on: app.db)
             },
             afterResponse: { res in
                 XCTAssertEqual(res.status, .accepted)
@@ -66,37 +65,29 @@ final class AuthTests: XCTestCase {
         
     }
     
-    func testCleanAfterAuth() throws {
+    func testCleanAfterAuth() async throws {
         let app = Application(.testing)
         
         defer { app.shutdown() }
         
         try configure(app)
         
-        try app.test(
+        try await app.test(
             .GET, "/",
             beforeRequest: { req in
-                try User.query(on: app.db)
-                    .filter(\.$username == "username")
-                    .first()
-                    .unwrap(or: Abort(.notFound, reason: "User does not exists"))
-                    .throwingFlatMap { user -> EventLoopFuture<User> in
-                        let id = user.id!
-                        
-                        return UserToken.query(on: app.db)
-                            .filter(\.$user.$id == id)
-                            .first()
-                            .unwrap(or: Abort(.notFound, reason: "UserToken does not exists"))
-                            .throwingFlatMap { token -> EventLoopFuture<User> in
-                                return token.delete(on: app.db).map { _  -> User in
-                                    return user
-                                }
-                            }
-                    }
-                    .throwingFlatMap { user -> EventLoopFuture<Void> in
-                        return user.delete(on: app.db)
-                    }
-                    .wait()
+                guard
+                    let user = try await User.query(on: app.db).filter(\.$username == "username").first(),
+                    let id = user.id
+                else {
+                    throw Abort(.notFound, reason: "User does not exists")
+                }
+                
+                guard let userToken = try await UserToken.query(on: app.db).filter(\.$user.$id == id).first() else {
+                    throw Abort(.notFound, reason: "UserToken does not exists")
+                }
+                
+                try await userToken.delete(on: app.db)
+                try await user.delete(on: app.db)
             },
             afterResponse: { res in
                 XCTAssertEqual(res.status, .ok)
