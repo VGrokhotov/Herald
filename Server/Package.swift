@@ -1,10 +1,10 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.6
 import PackageDescription
 
 let package = Package(
     name: "Herald",
     platforms: [
-       .macOS(.v10_15)
+       .macOS(.v12)
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
@@ -27,14 +27,16 @@ let package = Package(
             swiftSettings: [
                 // Enable better optimizations when building in Release configuration. Despite the use of
                 // the `.unsafeFlags` construct required by SwiftPM, this flag is recommended for Release
-                // builds. See <https://github.com/swift-server/guides#building-for-production> for details.
+                // builds. See <https://github.com/swift-server/guides/blob/main/docs/building.md#building-for-production> for details.
                 .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release))
             ]
         ),
-        .target(name: "Run", dependencies: [.target(name: "App")]),
-        .testTarget(name: "AppTests", dependencies: [
-            .target(name: "App"),
-            .product(name: "XCTVapor", package: "vapor"),
-        ])
+        .executableTarget(name: "Run", dependencies: [.target(name: "App")]),
+        .testTarget(
+            name: "AppTests", dependencies: [
+                .target(name: "App"),
+                .product(name: "XCTVapor", package: "vapor"),
+            ]
+        )
     ]
 )

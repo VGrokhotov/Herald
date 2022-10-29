@@ -2,7 +2,7 @@
 //  User.swift
 //  
 //
-//  Created by Vladislav Grokhotov on 19.05.2021.
+//  Created by Vladislav Grokhotov on 29.10.2022.
 //
 
 import Vapor
@@ -40,27 +40,33 @@ final class User: Model, Content {
 }
 
 struct Username: Content {
+    
     var username: String
 }
 
 extension User: Authenticatable {
+    
     func generateToken() throws -> UserToken {
         try .init(
             value: [UInt8].random(count: 16).base64,
-            userID: self.requireID()
+            userID: requireID()
         )
     }
 }
 
 extension User: Validatable {
+    
     static func validations(_ validations: inout Validations) {
         validations.add("email", as: String.self, is: .email)
     }
 }
 
 extension User {
+    
     struct Migration: Fluent.Migration {
+        
         var name: String { "CreateUser" }
+        
         func prepare(on database: Database) -> EventLoopFuture<Void> {
             database.schema("users")
                 .id()
@@ -80,6 +86,7 @@ extension User {
 }
 
 struct UserWithToken: Content {
+    
     let id: UUID
     let name: String
     let username: String

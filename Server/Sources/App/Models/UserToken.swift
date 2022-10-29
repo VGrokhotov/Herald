@@ -2,13 +2,14 @@
 //  UserToken.swift
 //  
 //
-//  Created by Vladislav Grokhotov on 19.05.2021.
+//  Created by Vladislav Grokhotov on 29.10.2022.
 //
 
 import Fluent
 import Vapor
 
 final class UserToken: Model, Content {
+    
     static let schema = "user_tokens"
 
     @ID(key: .id)
@@ -30,7 +31,9 @@ final class UserToken: Model, Content {
 }
 
 extension UserToken {
+    
     struct Migration: Fluent.Migration {
+        
         var name: String { "CreateUserToken" }
 
         func prepare(on database: Database) -> EventLoopFuture<Void> {
@@ -49,6 +52,7 @@ extension UserToken {
 }
 
 extension UserToken: ModelTokenAuthenticatable {
+    
     static let valueKey = \UserToken.$value
     static let userKey = \UserToken.$user
 
@@ -56,3 +60,4 @@ extension UserToken: ModelTokenAuthenticatable {
         true
     }
 }
+

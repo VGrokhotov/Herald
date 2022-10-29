@@ -2,7 +2,7 @@
 //  AuthController.swift
 //  
 //
-//  Created by Vladislav Grokhotov on 19.05.2021.
+//  Created by Vladislav Grokhotov on 29.10.2022.
 //
 
 import Vapor
@@ -17,6 +17,7 @@ final class AuthController {
     
     func create(_ req: Request) throws -> EventLoopFuture<Response> {
         try User.validate(content: req)
+        
         let user = try req.content.decode(User.self)
         
         return User.query(on: req.db)
@@ -40,16 +41,18 @@ final class AuthController {
             .filter(\.$username == username.username)
             .first()
             .unwrap(or: Abort(.notFound, reason: "User does not exists"))
-            .flatMap({ user -> EventLoopFuture<User> in
+            .flatMap{ user -> EventLoopFuture<User> in
                 let secret = String(Int.random(in: 1000..<10000))
+                
                 user.secret = secret
+                
                 return user.update(on: req.db).map{user }
-            })
+            }
             .flatMap { user in
                 let email = Mail(
                     from: "vladgrokhotov@gmail.com",
                     to: [
-                        MailUser(name: user.name, email: "vlad@grokhotov.ru")
+                        MailUser(name: user.name, email: user.email)
                     ],
                     subject: "Entering the account",
                     contentType: .plain,
@@ -75,30 +78,37 @@ final class AuthController {
                 user.$secret.wrappedValue
             }
             .unwrap(or: Abort(.conflict, reason: "User does not have secret"))
-            .flatMapThrowing({ secret -> String in
+            .flatMapThrowing { secret -> String in
                 let signers = JWTSigners()
                 signers.use(.hs256(key: secret))
+                
                 let payload = try signers.verify(jwt, as: Payload.self)
+                
                 return payload.username
-            })
-            .throwingFlatMap({ username -> EventLoopFuture<UserWithToken> in
+            }
+            .throwingFlatMap { username -> EventLoopFuture<UserWithToken> in
                 return User.query(on: req.db)
                     .filter(\.$username == username)
                     .first()
                     .unwrap(or: Abort(.notFound, reason: "User does not exists"))
-                    .throwingFlatMap( { user -> EventLoopFuture<UserWithToken> in
+                    .throwingFlatMap { user -> EventLoopFuture<UserWithToken> in
                         let token = try user.generateToken()
-                        guard let userId = user.id else { throw Abort(.internalServerError, reason: "No user ID")}
+                        
+                        guard let userId = user.id else {
+                            throw Abort(.internalServerError, reason: "No user ID")
+                        }
+                        
                         return token.create(on: req.db).map {
                             UserWithToken(
                                 id: userId,
                                 name: user.name,
                                 username: user.username,
                                 email: user.email,
-                                token: token.value)
+                                token: token.value
+                            )
                         }
-                    })
-            })
+                    }
+            }
             .encodeResponse(status: .accepted, for: req)
     }
     
@@ -106,6 +116,7 @@ final class AuthController {
         try req.auth.require(User.self)
         
         let token = req.headers.bearerAuthorization!.token
+        
         return UserToken.query(on: req.db)
             .filter(\.$value == token)
             .first()

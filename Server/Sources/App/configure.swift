@@ -4,10 +4,12 @@ import FluentPostgresDriver
 import VaporSMTPKit
 
 extension Application {
+    
     static let databaseUrl = URL(string: Environment.get("DB_URL")!)!
 }
 
 extension SMTPCredentials {
+    
     static var `default`: SMTPCredentials {
         return SMTPCredentials(
             hostname: Environment.get("SMTP_HOSTNAME")!,
@@ -19,7 +21,10 @@ extension SMTPCredentials {
 }
 
 extension EventLoopFuture {
-    public func throwingFlatMap<NewValue>(_ transform: @escaping (Value) throws -> EventLoopFuture<NewValue>) -> EventLoopFuture<NewValue> {
+    
+    func throwingFlatMap<NewValue>(
+        _ transform: @escaping (Value) throws -> EventLoopFuture<NewValue>
+    ) -> EventLoopFuture<NewValue> {
         flatMap { value in
             do {
                 return try transform(value)
@@ -32,8 +37,8 @@ extension EventLoopFuture {
 
 // configures your application
 public func configure(_ app: Application) throws {
-    // uncomment to serve files from /Public folder
-    // app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
+    // To serve files from /Public folder
+    app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     
     // db connection
     try app.databases.use(.postgres(url: Application.databaseUrl), as: .psql)
