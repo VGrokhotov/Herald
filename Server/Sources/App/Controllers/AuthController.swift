@@ -13,8 +13,6 @@ import JWTKit
 
 final class AuthController {
     
-    //MARK: POST
-    
     func create(_ req: Request) async throws -> Response {
         try User.validate(content: req)
         
@@ -74,6 +72,11 @@ final class AuthController {
         signers.use(.hs256(key: secret))
         
         let payload = try signers.verify(jwt, as: Payload.self)
+        
+        if payload.username != username.username {
+            throw Abort(.conflict, reason: "JWT payload does not match with body username")
+        }
+        
         let token = try user.generateToken()
         
         guard let userId = user.id else {
@@ -104,5 +107,4 @@ final class AuthController {
         
         return try await userToken.delete(on: req.db).transform(to: .noContent).get()
     }
-    
 }
