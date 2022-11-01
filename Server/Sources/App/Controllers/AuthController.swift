@@ -34,6 +34,7 @@ final class AuthController {
             throw Abort(.notFound, reason: "User does not exists")
         }
         
+        let credentials = try SMTPCredentials.getDefault()
         let secret = String(Int.random(in: 1000..<10000))
         
         user.secret = secret
@@ -50,7 +51,7 @@ final class AuthController {
             text: "Your code for entering - \(user.secret!)"
         )
         
-        return try await req.application.sendMail(email, withCredentials: .default).transform(to: .noContent).get()
+        return try await req.application.sendMail(email, withCredentials: credentials).transform(to: .noContent).get()
     }
     
     func signIn(_ req: Request) async throws -> Response {
@@ -99,10 +100,12 @@ final class AuthController {
     func logOut(_ req: Request) async throws -> HTTPStatus {
         try req.auth.require(User.self)
         
-        let token = req.headers.bearerAuthorization!.token
+        guard let token = req.headers.bearerAuthorization?.token else {
+            throw Abort(.unauthorized, reason: "No bearerAuthorization")
+        }
         
         guard let userToken = try await UserToken.query(on: req.db).filter(\.$value == token).first() else {
-            throw Abort(.unauthorized)
+            throw Abort(.unauthorized, reason: "No such token in DB")
         }
         
         return try await userToken.delete(on: req.db).transform(to: .noContent).get()

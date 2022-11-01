@@ -28,7 +28,7 @@ final class User: Model, Content {
     @Field(key: "secret")
     var secret: String?
 
-    init() { }
+    init() {}
 
     init(id: UUID? = nil, name: String, username: String, email: String, secret: String? = nil) {
         self.id = id

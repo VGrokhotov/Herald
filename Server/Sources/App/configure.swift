@@ -5,33 +5,36 @@ import VaporSMTPKit
 
 extension Application {
     
-    static let databaseUrl = URL(string: Environment.get("DB_URL")!)!
+    static func getDatabaseUrl() throws -> URL {
+        guard let dbUrl = Environment.get("DB_URL"), let url = URL(string: dbUrl) else {
+            throw Abort(.internalServerError, reason: "No dbUrl provided")
+        }
+        
+        return url
+    }
 }
 
 extension SMTPCredentials {
     
-    static var `default`: SMTPCredentials {
-        return SMTPCredentials(
-            hostname: Environment.get("SMTP_HOSTNAME")!,
-            ssl: .startTLS(configuration: .default),
-            email:  Environment.get("EMAIL")!,
-            password: Environment.get("EMAIL_PWD")!
-        )
-    }
-}
-
-extension EventLoopFuture {
-    
-    func throwingFlatMap<NewValue>(
-        _ transform: @escaping (Value) throws -> EventLoopFuture<NewValue>
-    ) -> EventLoopFuture<NewValue> {
-        flatMap { value in
-            do {
-                return try transform(value)
-            } catch {
-                return self.eventLoop.makeFailedFuture(error)
-            }
+    static func getDefault() throws -> SMTPCredentials {
+        guard let hostname = Environment.get("SMTP_HOSTNAME") else {
+            throw Abort(.internalServerError, reason: "No hostname provided")
         }
+        
+        guard let email = Environment.get("EMAIL") else {
+            throw Abort(.internalServerError, reason: "No email provided")
+        }
+        
+        guard let password = Environment.get("EMAIL_PWD") else {
+            throw Abort(.internalServerError, reason: "No email password provided")
+        }
+        
+        return SMTPCredentials(
+            hostname: hostname,
+            ssl: .startTLS(configuration: .default),
+            email: email,
+            password: password
+        )
     }
 }
 
@@ -41,7 +44,8 @@ public func configure(_ app: Application) throws {
     app.middleware.use(FileMiddleware(publicDirectory: app.directory.publicDirectory))
     
     // db connection
-    try app.databases.use(.postgres(url: Application.databaseUrl), as: .psql)
+    let dbUrl = try Application.getDatabaseUrl()
+    try app.databases.use(.postgres(url: dbUrl), as: .psql)
     
     // add migrations
     app.migrations.add(User.Migration())
