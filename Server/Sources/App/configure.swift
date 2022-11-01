@@ -46,6 +46,8 @@ public func configure(_ app: Application) throws {
     // add migrations
     app.migrations.add(User.Migration())
     app.migrations.add(UserToken.Migration())
+    app.migrations.add(Message.CreateMigration())
+    app.migrations.add(Chat.CreateMigration())
     let _ = app.autoMigrate()
     
     // register routes
