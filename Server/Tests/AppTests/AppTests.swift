@@ -4,28 +4,42 @@ import Fluent
 
 final class AuthTests: XCTestCase {
     
+    private enum Constants {
+        
+        static let username = "username"
+        static let name = "name"
+        static let email = "email@email.com"
+        static let secret = "1111"
+        
+        static let authBearer = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3JuIjoidXNlcm5hbWUiLCJleHAiOjY0MDkyMjExMjAwfQ.gJBnFeW-3b_ih6lP5gQGzhIbfvHsKUuTv6zfJ3ThkY0"
+    }
+    
+    static var app = Application(.testing)
+    
+    override class func setUp() {
+        try? configure(Self.app)
+    }
+    
+    override class func tearDown() {
+        Self.app.shutdown()
+    }
+    
+    override func setUp() async throws {
+        let user = User(name: Constants.name, username: Constants.username, email: Constants.email)
+        
+        if try await User.query(on: Self.app.db).filter(\.$username == Constants.username).first() == nil {
+            try await user.create(on: Self.app.db)
+        }
+    }
+    
+    override func tearDown() async throws {
+        try await clean()
+    }
+    
     func testAuth() async throws {
-        let app = Application(.testing)
+        let username = Username(username: Constants.username)
         
-        defer { app.shutdown() }
-        
-        try configure(app)
-
-        let user = User(name: "name", username: "username", email: "email@email.com")
-        
-        try app.test(
-            .POST, "signup",
-            beforeRequest: { req in
-                try req.content.encode(user)
-            },
-            afterResponse: { res in
-                XCTAssertEqual(res.status, .created)
-            }
-        )
-        
-        let username = Username(username: user.username)
-        
-        try app.test(
+        try Self.app.test(
             .POST, "email",
             beforeRequest: { req in
                 try req.content.encode(username)
@@ -36,27 +50,23 @@ final class AuthTests: XCTestCase {
         )
         
         var headers = HTTPHeaders()
+        headers.add(name: .authorization, value: Constants.authBearer)
         
-        headers.add(
-            name: .authorization,
-            value: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3JuIjoidXNlcm5hbWUiLCJleHAiOjY0MDkyMjExMjAwfQ.gJBnFeW-3b_ih6lP5gQGzhIbfvHsKUuTv6zfJ3ThkY0"
-        )
-        
-        try await app.test(
+        try await Self.app.test(
             .POST, "signin",
             headers: headers,
             beforeRequest: { req in
                 try req.content.encode(username)
                 
                 guard
-                    let user = try await User.query(on: app.db).filter(\.$username == username.username).first()
+                    let user = try await User.query(on: Self.app.db).filter(\.$username == username.username).first()
                 else {
                     throw Abort(.notFound, reason: "User does not exists")
                 }
                 
-                user.secret = "1111"
+                user.secret = Constants.secret
                 
-                try await user.update(on: app.db)
+                try await user.update(on: Self.app.db)
             },
             afterResponse: { res in
                 XCTAssertEqual(res.status, .accepted)
@@ -65,33 +75,44 @@ final class AuthTests: XCTestCase {
         
     }
     
-    func testCleanAfterAuth() async throws {
-        let app = Application(.testing)
+    func testFindUser() async throws {
+        try await testAuth()
         
-        defer { app.shutdown() }
+        var headers = HTTPHeaders()
+        headers.add(name: .authorization, value: Constants.authBearer)
         
-        try configure(app)
-        
-        try await app.test(
-            .GET, "/",
+        try Self.app.test(
+            .GET,
+            "users/find",
+            headers: headers,
             beforeRequest: { req in
-                guard
-                    let user = try await User.query(on: app.db).filter(\.$username == "username").first(),
-                    let id = user.id
-                else {
-                    throw Abort(.notFound, reason: "User does not exists")
-                }
-                
-                guard let userToken = try await UserToken.query(on: app.db).filter(\.$user.$id == id).first() else {
-                    throw Abort(.notFound, reason: "UserToken does not exists")
-                }
-                
-                try await userToken.delete(on: app.db)
-                try await user.delete(on: app.db)
+                try req.query.encode(Username(username: Constants.username))
             },
             afterResponse: { res in
                 XCTAssertEqual(res.status, .ok)
+                
+                guard let page = try? res.content.decode(Page<SearchUser>.self) else {
+                    return XCTAssert(false, "Invalid responce")
+                }
+                
+                XCTAssertEqual(page.items.first?.name, Constants.name)
             }
         )
+    }
+    
+    private func clean() async throws {
+        guard let user = try await User.query(on: Self.app.db).filter(\.$username == Constants.username).first() else {
+            throw Abort(.notFound, reason: "User does not exists")
+        }
+        
+        guard
+            let id = user.id,
+            let userToken = try await UserToken.query(on: Self.app.db).filter(\.$user.$id == id).first()
+        else {
+            throw Abort(.notFound, reason: "UserToken does not exists")
+        }
+        
+        try await userToken.delete(on: Self.app.db)
+        try await user.delete(on: Self.app.db)
     }
 }

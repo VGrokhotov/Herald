@@ -44,6 +44,12 @@ struct Username: Content {
     var username: String
 }
 
+struct SearchUser: Content {
+    
+    var username: String
+    var name: String
+}
+
 extension User: Authenticatable {
     
     func generateToken() throws -> UserToken {
