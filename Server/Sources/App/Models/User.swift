@@ -8,24 +8,39 @@
 import Vapor
 import Fluent
 
+private enum Constants {
+    
+    static let usersSchema = "users"
+    
+    static let name = "name"
+    static let username = "username"
+    static let email = "email"
+    static let secret = "secret"
+    
+    static let nameKey = FieldKey(stringLiteral: Constants.name)
+    static let usernameKey = FieldKey(stringLiteral: Constants.username)
+    static let emailKey = FieldKey(stringLiteral: Constants.email)
+    static let secretKey = FieldKey(stringLiteral: Constants.secret)
+}
+
 final class User: Model, Content {
     
     // Name of the table or collection.
-    static let schema = "users"
+    static let schema = Constants.usersSchema
 
     @ID(key: .id)
     var id: UUID?
 
-    @Field(key: "name")
+    @Field(key: Constants.nameKey)
     var name: String
     
-    @Field(key: "username")
+    @Field(key: Constants.usernameKey)
     var username: String
     
-    @Field(key: "email")
+    @Field(key: Constants.emailKey)
     var email: String
     
-    @Field(key: "secret")
+    @Field(key: Constants.secretKey)
     var secret: String?
 
     init() {}
@@ -63,7 +78,7 @@ extension User: Authenticatable {
 extension User: Validatable {
     
     static func validations(_ validations: inout Validations) {
-        validations.add("email", as: String.self, is: .email)
+        validations.add(ValidationKey(stringLiteral: Constants.email), as: String.self, is: .email)
     }
 }
 
@@ -74,19 +89,19 @@ extension User {
         var name: String { "CreateUser" }
         
         func prepare(on database: Database) -> EventLoopFuture<Void> {
-            database.schema("users")
+            database.schema(Constants.usersSchema)
                 .id()
-                .field("name", .string, .required)
-                .field("username", .string, .required)
-                .field("email", .string, .required)
-                .field("secret", .string)
-                .unique(on: "username")
+                .field(Constants.nameKey, .string, .required)
+                .field(Constants.usernameKey, .string, .required)
+                .field(Constants.emailKey, .string, .required)
+                .field(Constants.secretKey, .string)
+                .unique(on: Constants.usernameKey)
                 .create()
         }
         
         // Optionally reverts the changes made in the prepare method.
         func revert(on database: Database) -> EventLoopFuture<Void> {
-            database.schema("users").delete()
+            database.schema(Constants.usersSchema).delete()
         }
     }
 }

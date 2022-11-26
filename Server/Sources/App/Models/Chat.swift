@@ -14,9 +14,13 @@ private enum Constants {
     
     static let interlocutorId = "interlocutorId"
     static let interlocutorName = "interlocutorName"
-    static let interlocutorSurname = "interlocutorSurname"
     static let lastUpdated = "lastUpdated"
     static let messages = "messages"
+    
+    static let interlocutorIdKey = FieldKey(stringLiteral: Constants.interlocutorId)
+    static let interlocutorNameKey = FieldKey(stringLiteral: Constants.interlocutorName)
+    static let lastUpdatedKey = FieldKey(stringLiteral: Constants.lastUpdated)
+    static let messagesKey = FieldKey(stringLiteral: Constants.messages)
 }
 
 final class Chat: Model, Content {
@@ -27,19 +31,16 @@ final class Chat: Model, Content {
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: FieldKey(stringLiteral: Constants.interlocutorId))
+    @Field(key: Constants.interlocutorIdKey)
     var interlocutorId: UUID
     
-    @Field(key: FieldKey(stringLiteral: Constants.interlocutorName))
+    @Field(key: Constants.interlocutorNameKey)
     var interlocutorName: String
     
-    @Field(key: FieldKey(stringLiteral: Constants.interlocutorSurname))
-    var interlocutorSurname: String
-    
-    @Field(key: FieldKey(stringLiteral: Constants.lastUpdated))
+    @Field(key: Constants.lastUpdatedKey)
     var lastUpdated: Date
     
-    @Field(key: FieldKey(stringLiteral: Constants.messages))
+    @Field(key: Constants.messagesKey)
     var messages: [UUID]
     
     init() {}
@@ -48,14 +49,12 @@ final class Chat: Model, Content {
         id: UUID? = nil,
         interlocutorId: UUID,
         interlocutorName: String,
-        interlocutorSurname: String,
         lastUpdated: Date,
         messages: [UUID]
     ) {
         self.id = id
         self.interlocutorId = interlocutorId
         self.interlocutorName = interlocutorName
-        self.interlocutorSurname = interlocutorSurname
         self.lastUpdated = lastUpdated
         self.messages = messages
     }
@@ -70,11 +69,10 @@ extension Chat {
         func prepare(on database: Database) -> EventLoopFuture<Void> {
             return database.schema(Constants.chatsSchema)
                 .id()
-                .field(FieldKey(stringLiteral: Constants.interlocutorId), .uuid, .required)
-                .field(FieldKey(stringLiteral: Constants.interlocutorName), .string, .required)
-                .field(FieldKey(stringLiteral: Constants.interlocutorSurname), .string, .required)
-                .field(FieldKey(stringLiteral: Constants.lastUpdated), .date, .required)
-                .field(FieldKey(stringLiteral: Constants.messages), .array(of: .uuid), .required)
+                .field(Constants.interlocutorIdKey, .uuid, .required)
+                .field(Constants.interlocutorNameKey, .string, .required)
+                .field(Constants.lastUpdatedKey, .date, .required)
+                .field(Constants.messagesKey, .array(of: .uuid), .required)
                 .create()
         }
         

@@ -27,6 +27,14 @@ private enum Constants {
     static let fileSize = "fileSize"
     static let fileName = "fileName"
     
+    static let senderIdKey = FieldKey(stringLiteral: Constants.senderId)
+    static let contentKey = FieldKey(stringLiteral: Constants.content)
+    static let contentTypeKey = FieldKey(stringLiteral: Constants.contentType)
+    static let createdKey = FieldKey(stringLiteral: Constants.created)
+    static let fileSizeKey = FieldKey(stringLiteral: Constants.fileSize)
+    static let fileNameKey = FieldKey(stringLiteral: Constants.fileName)
+    
+    static let contentTypeEnumName = "ContentType"
     static let text = "text"
     static let image = "image"
     static let file = "file"
@@ -41,22 +49,22 @@ final class Message: Model, Content {
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: FieldKey(stringLiteral: Constants.senderId))
+    @Field(key: Constants.senderIdKey)
     var senderId: UUID
     
-    @Field(key: FieldKey(stringLiteral: Constants.content))
+    @Field(key: Constants.contentKey)
     var content: Data
     
-    @Enum(key: FieldKey(stringLiteral: Constants.contentType))
+    @Enum(key: Constants.contentTypeKey)
     var contentType: ContentType
     
-    @Field(key: FieldKey(stringLiteral: Constants.created))
+    @Field(key: Constants.createdKey)
     var created: Date
     
-    @Field(key: FieldKey(stringLiteral: Constants.fileSize))
+    @Field(key: Constants.fileSizeKey)
     var fileSize: Int?
     
-    @Field(key: FieldKey(stringLiteral: Constants.fileName))
+    @Field(key: Constants.fileNameKey)
     var fileName: String?
     
     init() {}
@@ -87,21 +95,21 @@ extension Message {
         var name: String { "CreateMessage" }
         
         func prepare(on database: Database) -> EventLoopFuture<Void> {
-            return database.enum("ContentType")
-                .case("text")
-                .case("image")
-                .case("file")
-                .case("unknown")
+            return database.enum(Constants.contentTypeEnumName)
+                .case(Constants.text)
+                .case(Constants.image)
+                .case(Constants.file)
+                .case(Constants.unknown)
                 .create()
                 .flatMap { enumDataType in
                     return database.schema(Constants.messagesSchema)
                         .id()
-                        .field(FieldKey(stringLiteral: Constants.senderId), .string, .required)
-                        .field(FieldKey(stringLiteral: Constants.content), .data, .required)
-                        .field(FieldKey(stringLiteral: Constants.contentType), enumDataType, .required)
-                        .field(FieldKey(stringLiteral: Constants.created), .date, .required)
-                        .field(FieldKey(stringLiteral: Constants.fileSize), .int)
-                        .field(FieldKey(stringLiteral: Constants.fileName), .string)
+                        .field(Constants.senderIdKey, .string, .required)
+                        .field(Constants.contentKey, .data, .required)
+                        .field(Constants.contentTypeKey, enumDataType, .required)
+                        .field(Constants.createdKey, .date, .required)
+                        .field(Constants.fileSizeKey, .int)
+                        .field(Constants.fileNameKey, .string)
                         .create()
                 }
         }

@@ -8,25 +8,39 @@
 import Fluent
 import Vapor
 
+private enum Constants {
+    
+    static let userTokenSchema = "user_tokens"
+    static let usersSchema = "users"
+    
+    static let value = "value"
+    static let userId = "user_id"
+    static let id = "id"
+    
+    static let valueKey = FieldKey(stringLiteral: Constants.value)
+    static let userIdKey = FieldKey(stringLiteral: Constants.userId)
+    static let idKey = FieldKey(stringLiteral: Constants.id)
+}
+
 final class UserToken: Model, Content {
     
-    static let schema = "user_tokens"
+    static let schema = Constants.userTokenSchema
 
     @ID(key: .id)
     var id: UUID?
 
-    @Field(key: "value")
+    @Field(key: Constants.valueKey)
     var value: String
 
-    @Parent(key: "user_id")
+    @Parent(key: Constants.userIdKey)
     var user: User
 
-    init() { }
+    init() {}
 
-    init(id: UUID? = nil, value: String, userID: User.IDValue) {
+    init(id: UUID? = nil, value: String, userId: User.IDValue) {
         self.id = id
         self.value = value
-        self.$user.id = userID
+        self.$user.id = userId
     }
 }
 
@@ -37,16 +51,16 @@ extension UserToken {
         var name: String { "CreateUserToken" }
 
         func prepare(on database: Database) -> EventLoopFuture<Void> {
-            database.schema("user_tokens")
+            database.schema(Constants.userTokenSchema)
                 .id()
-                .field("value", .string, .required)
-                .field("user_id", .uuid, .required, .references("users", "id"))
-                .unique(on: "value")
+                .field(Constants.valueKey, .string, .required)
+                .field(Constants.userIdKey, .uuid, .required, .references(Constants.usersSchema, Constants.idKey))
+                .unique(on: Constants.valueKey)
                 .create()
         }
 
         func revert(on database: Database) -> EventLoopFuture<Void> {
-            database.schema("user_tokens").delete()
+            database.schema(Constants.userTokenSchema).delete()
         }
     }
 }
